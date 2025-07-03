@@ -11,6 +11,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useApp } from "@/contexts/AppContext";
 import { mockProducts, categories, benefits } from "@/lib/mock-data";
+import bannerImage from "@/assets/banner.jpg";
 
 export default function HomePage() {
   const { state, dispatch } = useApp();
@@ -31,17 +32,18 @@ export default function HomePage() {
         <section className="relative h-[70vh] bg-gradient-to-r from-gray-900 to-gray-700 flex items-center">
           <div className="absolute inset-0">
             <Image
-              src="/placeholder.svg?height=800&width=1200"
+              src={bannerImage}
               alt="Hero Banner"
               fill
               className="object-cover opacity-50"
             />
           </div>
+
           <div className="relative container mx-auto px-4 text-white">
             <div className="max-w-2xl">
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                Discover Your
-                <span className="text-rose-400 block">Perfect Style</span>
+                Unleash Your Style with
+                <span className="text-rose-400 ml-3">KoLaz</span>
               </h1>
               <p className="text-xl mb-8 text-gray-200">
                 Premium fashion collection with sustainable practices and modern

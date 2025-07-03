@@ -1,64 +1,67 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ShoppingBag, Share2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import type { Product } from "@/contexts/AppContext"
-import { useApp } from "@/contexts/AppContext"
-import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, ShoppingBag, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import type { Product } from "@/contexts/AppContext";
+import { useApp } from "@/contexts/AppContext";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
-  product: Product
-  hideQuickAdd?: boolean
+  product: Product;
+  hideQuickAdd?: boolean;
 }
 
-export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps) {
-  const [isLiked, setIsLiked] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-  const { dispatch } = useApp()
-  const { toast } = useToast()
+export function ProductCard({
+  product,
+  hideQuickAdd = false,
+}: ProductCardProps) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const { dispatch } = useApp();
+  const { toast } = useToast();
 
   const discountPercentage = product.salePrice
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-    : 0
+    : 0;
 
   const shareProduct = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
-    const productUrl = `${window.location.origin}/product/${product.id}`
+    const productUrl = `${window.location.origin}/product/${product.id}`;
 
     try {
-      await navigator.clipboard.writeText(productUrl)
+      await navigator.clipboard.writeText(productUrl);
       toast({
         title: "Product link copied to clipboard!",
         description: "Share this product with your friends",
-      })
+      });
     } catch (err) {
       toast({
         title: "Failed to copy link",
         description: "Please try again",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const quickAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     if (product.stock === 0) {
       toast({
         title: "Out of stock",
         description: "This product is currently unavailable",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Add to cart with default selections (first available color and size)
@@ -68,14 +71,14 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
       size: product.sizes[0],
       color: product.colors[0],
       quantity: 1,
-    }
+    };
 
-    dispatch({ type: "ADD_TO_CART", payload: cartItem })
+    dispatch({ type: "ADD_TO_CART", payload: cartItem });
     toast({
       title: "Added to cart!",
       description: `${product.name} has been added to your cart`,
-    })
-  }
+    });
+  };
 
   return (
     <div
@@ -96,14 +99,24 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {product.isNewArrival && <Badge className="bg-rose-600 text-white">New</Badge>}
-          {product.isBestSeller && <Badge className="bg-gray-900 text-white">Best Seller</Badge>}
-          {discountPercentage > 0 && <Badge className="bg-green-600 text-white">-{discountPercentage}%</Badge>}
+          {product.isNewArrival && (
+            <Badge className="bg-rose-600 text-white">New</Badge>
+          )}
+          {product.isBestSeller && (
+            <Badge className="bg-gray-900 text-white">Best Seller</Badge>
+          )}
+          {discountPercentage > 0 && (
+            <Badge className="bg-green-600 text-white">
+              -{discountPercentage}%
+            </Badge>
+          )}
         </div>
 
         {/* Actions */}
         <div
-          className={`absolute top-3 right-3 flex flex-col gap-2 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
+          className={`absolute top-3 right-3 flex flex-col gap-2 transition-opacity duration-300 ${
+            isHovered ? "opacity-100" : "opacity-0"
+          }`}
         >
           <Button
             variant="secondary"
@@ -111,14 +124,22 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
             className="h-8 w-8 rounded-full bg-white/90 hover:bg-white"
             onClick={() => setIsLiked(!isLiked)}
           >
-            <Heart className={`h-4 w-4 ${isLiked ? "fill-rose-600 text-rose-600" : "text-gray-600"}`} />
+            <Heart
+              className={`h-4 w-4 ${
+                isLiked ? "fill-rose-600 text-rose-600" : "text-gray-600"
+              }`}
+            />
           </Button>
         </div>
 
         {/* Quick Add to Cart - Only show if not hidden */}
         {!hideQuickAdd && (
           <div
-            className={`absolute bottom-3 left-3 right-3 transition-all duration-300 ${isHovered ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+            className={`absolute bottom-3 left-3 right-3 transition-all duration-300 ${
+              isHovered
+                ? "translate-y-0 opacity-100"
+                : "translate-y-2 opacity-0"
+            }`}
           >
             <div className="flex space-x-2">
               <Button
@@ -129,7 +150,12 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
                 <ShoppingBag className="h-4 w-4 mr-2" />
                 {product.stock === 0 ? "Out of Stock" : "Quick Add"}
               </Button>
-              <Button variant="secondary" size="icon" className="bg-white/90 hover:bg-white" onClick={shareProduct}>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="bg-white/90 hover:bg-white"
+                onClick={shareProduct}
+              >
                 <Share2 className="h-4 w-4" />
               </Button>
             </div>
@@ -138,7 +164,13 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
 
         {/* Stock Status */}
         {product.stock <= 5 && product.stock > 0 && (
-          <div className="absolute bottom-3 left-3">
+          <div
+            className={`absolute top-3 right-3  transition-all duration-300 ${
+              isHovered
+                ? "translate-y-2 opacity-0"
+                : "translate-y-0 opacity-100"
+            }`}
+          >
             <Badge variant="destructive">Only {product.stock} left</Badge>
           </div>
         )}
@@ -165,11 +197,17 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
           <div className="flex items-center space-x-2">
             {product.salePrice ? (
               <>
-                <span className="text-lg font-semibold text-gray-900">৳{product.salePrice.toLocaleString()}</span>
-                <span className="text-sm text-gray-500 line-through">৳{product.price.toLocaleString()}</span>
+                <span className="text-lg font-semibold text-gray-900">
+                  ৳{product.salePrice.toLocaleString()}
+                </span>
+                <span className="text-sm text-gray-500 line-through">
+                  ৳{product.price.toLocaleString()}
+                </span>
               </>
             ) : (
-              <span className="text-lg font-semibold text-gray-900">৳{product.price.toLocaleString()}</span>
+              <span className="text-lg font-semibold text-gray-900">
+                ৳{product.price.toLocaleString()}
+              </span>
             )}
           </div>
 
@@ -185,12 +223,14 @@ export function ProductCard({ product, hideQuickAdd = false }: ProductCardProps)
             ))}
             {product.colors.length > 3 && (
               <div className="w-4 h-4 rounded-full border border-gray-300 bg-gray-100 flex items-center justify-center">
-                <span className="text-xs text-gray-600">+{product.colors.length - 3}</span>
+                <span className="text-xs text-gray-600">
+                  +{product.colors.length - 3}
+                </span>
               </div>
             )}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

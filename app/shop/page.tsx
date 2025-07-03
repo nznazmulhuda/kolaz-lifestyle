@@ -106,7 +106,7 @@ export default function ShopPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <div className={`lg:w-64 ${isFilterOpen ? "block" : "hidden lg:block"}`}>
-            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-4">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-10">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold">Filters</h2>
                 {activeFiltersCount > 0 && (
