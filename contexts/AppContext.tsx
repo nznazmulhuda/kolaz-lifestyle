@@ -63,7 +63,6 @@ interface Order {
   trackingId?: string;
 }
 
-
 // Add to the AppState interface
 interface AppState {
   user: User | null;
@@ -74,6 +73,7 @@ interface AppState {
   bestSellerProducts: Product[];
   orders: Order[];
   colors: FlatColor[];
+  categorys: string[];
   isLoading: boolean;
   appliedCoupon: string | null;
   couponDiscount: number;
@@ -88,6 +88,7 @@ type AppAction =
   | { type: "CLEAR_CART" }
   | { type: "TOGGLE_CART" }
   | { type: "SET_COLORS"; payload: FlatColor[] }
+  | { type: "SET_CATEGORYS"; payload: string[] }
   | { type: "SET_PRODUCTS"; payload: Product[] }
   | { type: "SET_FEATURED_PRODUCTS"; payload: Product[] }
   | { type: "SET_BESTSELLER_PRODUCTS"; payload: Product[] }
@@ -105,6 +106,7 @@ const initialState: AppState = {
   featuredProducts: [],
   bestSellerProducts: [],
   colors: [],
+  categorys: [],
   orders: [],
   isLoading: false,
   appliedCoupon: null,
@@ -156,6 +158,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case "TOGGLE_CART":
       return { ...state, isCartOpen: !state.isCartOpen };
+
+    case "SET_CATEGORYS":
+      return { ...state, categorys: action.payload };
 
     case "SET_COLORS":
       return { ...state, colors: action.payload };

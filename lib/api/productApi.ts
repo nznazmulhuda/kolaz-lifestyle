@@ -17,6 +17,16 @@ interface Color {
   }[];
 }
 
+interface Category {
+  category: {
+    main: string;
+  };
+}
+
+interface FlatCategory {
+  category: string;
+}
+
 class ProductAPI {
   /**
    * Fetch all products and transform to frontend schema
@@ -96,6 +106,27 @@ class ProductAPI {
       .sort((a, b) => a.name.localeCompare(b.name)); // optional sort by name
 
     return uniqueColors;
+  }
+
+  /**
+   * Get category data
+   */
+
+  async getCategory(): Promise<string[]> {
+    const res = await api.get(`/products?fields=category.main`);
+    const data = res?.data?.data || [];
+
+    const seen = new Set<string>();
+
+    const uniqueCategories = data
+      .map((item: { category: { main: string } }) => item.category.main)
+      .filter((cat) => {
+        if (seen.has(cat)) return false;
+        seen.add(cat);
+        return true;
+      });
+
+    return uniqueCategories;
   }
 }
 

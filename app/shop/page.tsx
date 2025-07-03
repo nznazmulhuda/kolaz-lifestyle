@@ -42,11 +42,12 @@ export default function ShopPage() {
     const fetchData = async () => {
       const data = await productAPI.getAll();
       const colors = await productAPI.getColors();
+      const categorys = await productAPI.getCategory();
 
       dispatch({ type: "SET_PRODUCTS", payload: data });
       dispatch({ type: "SET_COLORS", payload: colors });
+      dispatch({ type: "SET_CATEGORYS", payload: categorys });
 
-      console.log(colors[0]);
       setFilteredProducts(data);
     };
 
@@ -112,8 +113,6 @@ export default function ShopPage() {
     sortBy,
   ]);
 
-  const categories = ["Jeans", "Men", "Unisex", "Accessories"];
-  const colors = ["Black", "White", "Blue", "Red", "Gray", "Navy", "Burgundy"];
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -172,7 +171,7 @@ export default function ShopPage() {
               <div className="mb-6">
                 <h3 className="font-medium mb-3">Category</h3>
                 <div className="space-y-2">
-                  {categories.map((category) => (
+                  {state?.categorys?.map((category) => (
                     <div key={category} className="flex items-center space-x-2">
                       <Checkbox
                         id={category}
