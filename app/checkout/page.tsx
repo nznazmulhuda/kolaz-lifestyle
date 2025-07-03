@@ -397,7 +397,7 @@ export default function CheckoutPage() {
                       variant="ghost"
                       size="sm"
                       onClick={removeCoupon}
-                      className="text-green-700 hover:text-green-800"
+                      className="text-green-700 hover:text-white"
                     >
                       Remove
                     </Button>
