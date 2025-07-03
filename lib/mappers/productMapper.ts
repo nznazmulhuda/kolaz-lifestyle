@@ -3,7 +3,7 @@ import { TDenimProduct } from "@/interfaces/product.interface";
 
 export const transformToFrontendProduct = (product: TDenimProduct): Product => {
   return {
-    id: product._id,
+    id: product.sku,
     name: product.name,
     price: product.pricing.basePrice,
     salePrice: product.pricing.salePrice,

@@ -16,13 +16,15 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
-import { useApp } from "@/contexts/AppContext";
+import { Product, useApp } from "@/contexts/AppContext";
 import { mockProducts } from "@/lib/mock-data";
 import { productAPI } from "@/lib/api/productApi";
 
 export default function ShopPage() {
   const { state, dispatch } = useApp();
-  const [filteredProducts, setFilteredProducts] = useState(state.products);
+  const [filteredProducts, setFilteredProducts] = useState<Product[] | []>(
+    state.products
+  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -33,7 +35,7 @@ export default function ShopPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [priceRange, setPriceRange] = useState([0, 50000]);
   const [selectedGender, setSelectedGender] = useState<string[]>([]);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export default function ShopPage() {
     sortBy,
   ]);
 
-  const categories = ["Women", "Men", "Unisex", "Accessories"];
+  const categories = ["Jeans", "Men", "Unisex", "Accessories"];
   const colors = ["Black", "White", "Blue", "Red", "Gray", "Navy", "Burgundy"];
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -122,8 +124,9 @@ export default function ShopPage() {
     setSelectedCategories([]);
     setSelectedColors([]);
     setSelectedSizes([]);
-    setPriceRange([0, 5000]);
+    setPriceRange([0, 50000]);
     setSelectedGender([]);
+    setFilteredProducts(state.products);
   };
 
   const activeFiltersCount =
@@ -202,7 +205,7 @@ export default function ShopPage() {
                   <Slider
                     value={priceRange}
                     onValueChange={setPriceRange}
-                    max={5000}
+                    max={50000}
                     min={0}
                     step={100}
                     className="mb-4"
@@ -318,11 +321,14 @@ export default function ShopPage() {
                 {/* Items per page */}
                 <Select
                   value={itemsPerPage.toString()}
-                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                  onValueChange={(value) => (
+                    setCurrentPage(1), setItemsPerPage(Number(value))
+                  )}
                 >
                   <SelectTrigger className="w-20">
                     <SelectValue />
                   </SelectTrigger>
+
                   <SelectContent>
                     <SelectItem value="12">12</SelectItem>
                     <SelectItem value="24">24</SelectItem>
