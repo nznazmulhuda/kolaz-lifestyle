@@ -5,6 +5,18 @@ import api from "./axiosInstance";
 import { transformToFrontendProduct } from "@/lib/mappers/productMapper";
 import { TDenimProduct } from "@/interfaces/product.interface";
 
+export interface FlatColor {
+  hex: string;
+  name: string;
+}
+
+interface Color {
+  color: {
+    hex: string;
+    name: string;
+  }[];
+}
+
 class ProductAPI {
   /**
    * Fetch all products and transform to frontend schema
@@ -61,6 +73,29 @@ class ProductAPI {
    */
   async delete(id: string) {
     return await api.delete(`/products/${id}`);
+  }
+
+  /**
+   * Get all color data
+   */
+  async getColors(): Promise<FlatColor[]> {
+    const res = await api.get<Color[]>(`/products?fields=color.name,color.hex`);
+
+    const rawColors = res?.data?.data || [];
+
+    const seen = new Set<string>();
+
+    const uniqueColors = rawColors
+      .flatMap((item) => item.color) // Flatten nested array
+      .filter((c) => {
+        const key = `${c.hex.toLowerCase()}|${c.name.toLowerCase()}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name)); // optional sort by name
+
+    return uniqueColors;
   }
 }
 

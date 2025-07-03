@@ -1,5 +1,6 @@
 "use client";
 
+import { FlatColor } from "@/lib/api/productApi";
 import type React from "react";
 import { createContext, useContext, useReducer, type ReactNode } from "react";
 
@@ -62,6 +63,7 @@ interface Order {
   trackingId?: string;
 }
 
+
 // Add to the AppState interface
 interface AppState {
   user: User | null;
@@ -71,6 +73,7 @@ interface AppState {
   featuredProducts: Product[];
   bestSellerProducts: Product[];
   orders: Order[];
+  colors: FlatColor[];
   isLoading: boolean;
   appliedCoupon: string | null;
   couponDiscount: number;
@@ -84,6 +87,7 @@ type AppAction =
   | { type: "UPDATE_CART_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "CLEAR_CART" }
   | { type: "TOGGLE_CART" }
+  | { type: "SET_COLORS"; payload: FlatColor[] }
   | { type: "SET_PRODUCTS"; payload: Product[] }
   | { type: "SET_FEATURED_PRODUCTS"; payload: Product[] }
   | { type: "SET_BESTSELLER_PRODUCTS"; payload: Product[] }
@@ -100,6 +104,7 @@ const initialState: AppState = {
   products: [],
   featuredProducts: [],
   bestSellerProducts: [],
+  colors: [],
   orders: [],
   isLoading: false,
   appliedCoupon: null,
@@ -151,6 +156,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case "TOGGLE_CART":
       return { ...state, isCartOpen: !state.isCartOpen };
+
+    case "SET_COLORS":
+      return { ...state, colors: action.payload };
 
     case "SET_PRODUCTS":
       return { ...state, products: action.payload };

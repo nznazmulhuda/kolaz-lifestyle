@@ -41,9 +41,12 @@ export default function ShopPage() {
   useEffect(() => {
     const fetchData = async () => {
       const data = await productAPI.getAll();
+      const colors = await productAPI.getColors();
 
       dispatch({ type: "SET_PRODUCTS", payload: data });
+      dispatch({ type: "SET_COLORS", payload: colors });
 
+      console.log(colors[0]);
       setFilteredProducts(data);
     };
 
@@ -221,25 +224,25 @@ export default function ShopPage() {
               <div className="mb-6">
                 <h3 className="font-medium mb-3">Colors</h3>
                 <div className="grid grid-cols-4 gap-2">
-                  {colors.map((color) => (
+                  {state?.colors?.map((color, id) => (
                     <button
-                      key={color}
+                      key={id}
                       className={`w-8 h-8 rounded-full border-2 ${
-                        selectedColors.includes(color)
+                        selectedColors.includes(color.name)
                           ? "border-gray-900 ring-2 ring-gray-300"
                           : "border-gray-300"
                       }`}
-                      style={{ backgroundColor: color.toLowerCase() }}
+                      style={{ backgroundColor: color.hex }}
                       onClick={() => {
-                        if (selectedColors.includes(color)) {
+                        if (selectedColors.includes(color.name)) {
                           setSelectedColors(
-                            selectedColors.filter((c) => c !== color)
+                            selectedColors.filter((c) => c !== color.name)
                           );
                         } else {
-                          setSelectedColors([...selectedColors, color]);
+                          setSelectedColors([...selectedColors, color.name]);
                         }
                       }}
-                      title={color}
+                      title={color.name}
                     />
                   ))}
                 </div>
