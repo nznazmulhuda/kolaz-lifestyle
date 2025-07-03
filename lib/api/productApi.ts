@@ -1,32 +1,66 @@
+// lib/api/ProductAPI.ts
+
+import { Product } from "@/contexts/AppContext";
 import api from "./axiosInstance";
+import { transformToFrontendProduct } from "@/lib/mappers/productMapper";
+import { TDenimProduct } from "@/interfaces/product.interface";
 
 class ProductAPI {
-  getAll() {
-    return api.get("/products");
+  /**
+   * Fetch all products and transform to frontend schema
+   */
+  async getAll(): Promise<Product[]> {
+    const res = await api.get<{ data: TDenimProduct[] }>("/products?limit=0");
+    return res?.data?.data?.map(transformToFrontendProduct);
   }
 
-  getFeaturedProducts() {
-    return api.get("/products?isFeatured=true&limit=8");
+  /**
+   * Fetch featured products for homepage
+   */
+  async getFeaturedProducts(): Promise<Product[]> {
+    const res = await api.get<{ data: TDenimProduct[] }>(
+      "/products?isFeatured=true&limit=8"
+    );
+    return res?.data?.data?.map(transformToFrontendProduct);
   }
 
-  getBestSellerProducts() {
-    return api.get("/products?isBestSeller=true&limit=12");
+  /**
+   * Fetch best seller products
+   */
+  async getBestSellerProducts(): Promise<Product[]> {
+    const res = await api.get<{ data: TDenimProduct[] }>(
+      "/products?isBestSeller=true&limit=12"
+    );
+    return res?.data?.data?.map(transformToFrontendProduct);
   }
 
-  getById(id: string) {
-    return api.get(`/products/${id}`);
+  /**
+   * Fetch single product by ID
+   */
+  async getById(id: string): Promise<Product> {
+    const res = await api.get<{ data: TDenimProduct }>(`/products/${id}`);
+    return transformToFrontendProduct(res?.data?.data);
   }
 
-  create(data: any) {
-    return api.post("/products", data);
+  /**
+   * Create new product (admin panel)
+   */
+  async create(data: any) {
+    return await api.post("/products", data);
   }
 
-  update(id: string, data: any) {
-    return api.patch(`/products/${id}`, data);
+  /**
+   * Update product by ID (admin panel)
+   */
+  async update(id: string, data: any) {
+    return await api.patch(`/products/${id}`, data);
   }
 
-  delete(id: string) {
-    return api.delete(`/products/${id}`);
+  /**
+   * Delete product by ID (admin panel)
+   */
+  async delete(id: string) {
+    return await api.delete(`/products/${id}`);
   }
 }
 

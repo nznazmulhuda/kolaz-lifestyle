@@ -9,19 +9,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
-import { useApp } from "@/contexts/AppContext";
+import { Product, useApp } from "@/contexts/AppContext";
 import { mockProducts, categories, benefits } from "@/lib/mock-data";
 import bannerImage from "@/assets/banner.jpg";
+import { productAPI } from "@/lib/api/productApi";
 
 export default function HomePage() {
   const { state, dispatch } = useApp();
 
   useEffect(() => {
-    dispatch({ type: "SET_PRODUCTS", payload: mockProducts });
-  }, [dispatch]);
+    const fetchData = async () => {
+      const featuredProducts = await productAPI.getFeaturedProducts();
+      const bestSellerProducts = await productAPI.getBestSellerProducts();
 
-  const featuredProducts = mockProducts.filter((p) => p.isFeatured);
-  const bestSellingProducts = mockProducts.filter((p) => p.isBestSeller);
+      dispatch({ type: "SET_FEATURED_PRODUCTS", payload: featuredProducts });
+      dispatch({
+        type: "SET_BESTSELLER_PRODUCTS",
+        payload: bestSellerProducts,
+      });
+    };
+
+    fetchData();
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -140,7 +149,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
+              {state?.featuredProducts?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -158,7 +167,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {bestSellingProducts.map((product) => (
+              {state?.bestSellerProducts?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

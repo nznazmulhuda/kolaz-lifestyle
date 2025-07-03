@@ -1,96 +1,136 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Filter, Grid, List } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
-import { Header } from "@/components/layout/Header"
-import { Footer } from "@/components/layout/Footer"
-import { ProductCard } from "@/components/product/ProductCard"
-import { useApp } from "@/contexts/AppContext"
-import { mockProducts } from "@/lib/mock-data"
+import { useState, useEffect } from "react";
+import { Filter, Grid, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { ProductCard } from "@/components/product/ProductCard";
+import { useApp } from "@/contexts/AppContext";
+import { mockProducts } from "@/lib/mock-data";
+import { productAPI } from "@/lib/api/productApi";
 
 export default function ShopPage() {
-  const { dispatch } = useApp()
-  const [filteredProducts, setFilteredProducts] = useState(mockProducts)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [itemsPerPage, setItemsPerPage] = useState(12)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [sortBy, setSortBy] = useState("newest")
+  const { state, dispatch } = useApp();
+  const [filteredProducts, setFilteredProducts] = useState(state.products);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState("newest");
 
   // Filter states
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedColors, setSelectedColors] = useState<string[]>([])
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
-  const [priceRange, setPriceRange] = useState([0, 5000])
-  const [selectedGender, setSelectedGender] = useState<string[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [selectedGender, setSelectedGender] = useState<string[]>([]);
 
   useEffect(() => {
-    dispatch({ type: "SET_PRODUCTS", payload: mockProducts })
-  }, [dispatch])
+    const fetchData = async () => {
+      const data = await productAPI.getAll();
+
+      dispatch({ type: "SET_PRODUCTS", payload: data });
+
+      setFilteredProducts(data);
+    };
+
+    fetchData();
+  }, [dispatch]);
 
   useEffect(() => {
-    let filtered = [...mockProducts]
+    let filtered = [...state.products];
 
     // Apply filters
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter((p) => selectedCategories.includes(p.category))
+      filtered = filtered.filter((p) =>
+        selectedCategories.includes(p.category)
+      );
     }
 
     if (selectedColors.length > 0) {
-      filtered = filtered.filter((p) => p.colors.some((color) => selectedColors.includes(color)))
+      filtered = filtered.filter((p) =>
+        p.colors.some((color) => selectedColors.includes(color))
+      );
     }
 
     if (selectedSizes.length > 0) {
-      filtered = filtered.filter((p) => p.sizes.some((size) => selectedSizes.includes(size)))
+      filtered = filtered.filter((p) =>
+        p.sizes.some((size) => selectedSizes.includes(size))
+      );
     }
 
     filtered = filtered.filter((p) => {
-      const price = p.salePrice || p.price
-      return price >= priceRange[0] && price <= priceRange[1]
-    })
+      const price = p.salePrice || p.price;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
 
     // Apply sorting
     switch (sortBy) {
       case "price-low":
-        filtered.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price))
-        break
+        filtered.sort(
+          (a, b) => (a.salePrice || a.price) - (b.salePrice || b.price)
+        );
+        break;
       case "price-high":
-        filtered.sort((a, b) => (b.salePrice || b.price) - (a.salePrice || a.price))
-        break
+        filtered.sort(
+          (a, b) => (b.salePrice || b.price) - (a.salePrice || a.price)
+        );
+        break;
       case "newest":
-        filtered.sort((a, b) => (b.isNewArrival ? 1 : 0) - (a.isNewArrival ? 1 : 0))
-        break
+        filtered.sort(
+          (a, b) => (b.isNewArrival ? 1 : 0) - (a.isNewArrival ? 1 : 0)
+        );
+        break;
       default:
-        break
+        break;
     }
 
-    setFilteredProducts(filtered)
-    setCurrentPage(1)
-  }, [selectedCategories, selectedColors, selectedSizes, priceRange, selectedGender, sortBy])
+    setFilteredProducts(filtered);
+    setCurrentPage(1);
+  }, [
+    selectedCategories,
+    selectedColors,
+    selectedSizes,
+    priceRange,
+    selectedGender,
+    sortBy,
+  ]);
 
-  const categories = ["Women", "Men", "Unisex", "Accessories"]
-  const colors = ["Black", "White", "Blue", "Red", "Gray", "Navy", "Burgundy"]
-  const sizes = ["XS", "S", "M", "L", "XL", "XXL"]
+  const categories = ["Women", "Men", "Unisex", "Accessories"];
+  const colors = ["Black", "White", "Blue", "Red", "Gray", "Navy", "Burgundy"];
+  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const clearFilters = () => {
-    setSelectedCategories([])
-    setSelectedColors([])
-    setSelectedSizes([])
-    setPriceRange([0, 5000])
-    setSelectedGender([])
-  }
+    setSelectedCategories([]);
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setPriceRange([0, 5000]);
+    setSelectedGender([]);
+  };
 
   const activeFiltersCount =
-    selectedCategories.length + selectedColors.length + selectedSizes.length + selectedGender.length
+    selectedCategories.length +
+    selectedColors.length +
+    selectedSizes.length +
+    selectedGender.length;
 
   return (
     <div className="min-h-screen bg-white">
@@ -99,13 +139,19 @@ export default function ShopPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Shop All Products</h1>
-          <p className="text-gray-600">Discover our complete collection of premium fashion</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Shop All Products
+          </h1>
+          <p className="text-gray-600">
+            Discover our complete collection of premium fashion
+          </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
-          <div className={`lg:w-64 ${isFilterOpen ? "block" : "hidden lg:block"}`}>
+          <div
+            className={`lg:w-64 ${isFilterOpen ? "block" : "hidden lg:block"}`}
+          >
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-10">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold">Filters</h2>
@@ -127,13 +173,21 @@ export default function ShopPage() {
                         checked={selectedCategories.includes(category)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            setSelectedCategories([...selectedCategories, category])
+                            setSelectedCategories([
+                              ...selectedCategories,
+                              category,
+                            ]);
                           } else {
-                            setSelectedCategories(selectedCategories.filter((c) => c !== category))
+                            setSelectedCategories(
+                              selectedCategories.filter((c) => c !== category)
+                            );
                           }
                         }}
                       />
-                      <label htmlFor={category} className="text-sm text-gray-700 cursor-pointer">
+                      <label
+                        htmlFor={category}
+                        className="text-sm text-gray-700 cursor-pointer"
+                      >
                         {category}
                       </label>
                     </div>
@@ -168,14 +222,18 @@ export default function ShopPage() {
                     <button
                       key={color}
                       className={`w-8 h-8 rounded-full border-2 ${
-                        selectedColors.includes(color) ? "border-gray-900 ring-2 ring-gray-300" : "border-gray-300"
+                        selectedColors.includes(color)
+                          ? "border-gray-900 ring-2 ring-gray-300"
+                          : "border-gray-300"
                       }`}
                       style={{ backgroundColor: color.toLowerCase() }}
                       onClick={() => {
                         if (selectedColors.includes(color)) {
-                          setSelectedColors(selectedColors.filter((c) => c !== color))
+                          setSelectedColors(
+                            selectedColors.filter((c) => c !== color)
+                          );
                         } else {
-                          setSelectedColors([...selectedColors, color])
+                          setSelectedColors([...selectedColors, color]);
                         }
                       }}
                       title={color}
@@ -198,9 +256,11 @@ export default function ShopPage() {
                       }`}
                       onClick={() => {
                         if (selectedSizes.includes(size)) {
-                          setSelectedSizes(selectedSizes.filter((s) => s !== size))
+                          setSelectedSizes(
+                            selectedSizes.filter((s) => s !== size)
+                          );
                         } else {
-                          setSelectedSizes([...selectedSizes, size])
+                          setSelectedSizes([...selectedSizes, size]);
                         }
                       }}
                     >
@@ -228,8 +288,9 @@ export default function ShopPage() {
                 </Button>
 
                 <p className="text-sm text-gray-600">
-                  Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredProducts.length)} of{" "}
-                  {filteredProducts.length} products
+                  Showing {startIndex + 1}-
+                  {Math.min(startIndex + itemsPerPage, filteredProducts.length)}{" "}
+                  of {filteredProducts.length} products
                 </p>
               </div>
 
@@ -255,7 +316,10 @@ export default function ShopPage() {
                 </div>
 
                 {/* Items per page */}
-                <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
                   <SelectTrigger className="w-20">
                     <SelectValue />
                   </SelectTrigger>
@@ -273,8 +337,12 @@ export default function ShopPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="price-low">
+                      Price: Low to High
+                    </SelectItem>
+                    <SelectItem value="price-high">
+                      Price: High to Low
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -288,7 +356,11 @@ export default function ShopPage() {
                     key={category}
                     variant="secondary"
                     className="cursor-pointer"
-                    onClick={() => setSelectedCategories(selectedCategories.filter((c) => c !== category))}
+                    onClick={() =>
+                      setSelectedCategories(
+                        selectedCategories.filter((c) => c !== category)
+                      )
+                    }
                   >
                     {category} ×
                   </Badge>
@@ -298,7 +370,11 @@ export default function ShopPage() {
                     key={color}
                     variant="secondary"
                     className="cursor-pointer"
-                    onClick={() => setSelectedColors(selectedColors.filter((c) => c !== color))}
+                    onClick={() =>
+                      setSelectedColors(
+                        selectedColors.filter((c) => c !== color)
+                      )
+                    }
                   >
                     {color} ×
                   </Badge>
@@ -308,7 +384,9 @@ export default function ShopPage() {
                     key={size}
                     variant="secondary"
                     className="cursor-pointer"
-                    onClick={() => setSelectedSizes(selectedSizes.filter((s) => s !== size))}
+                    onClick={() =>
+                      setSelectedSizes(selectedSizes.filter((s) => s !== size))
+                    }
                   >
                     {size} ×
                   </Badge>
@@ -319,7 +397,9 @@ export default function ShopPage() {
             {/* Products Grid */}
             <div
               className={`grid gap-6 ${
-                viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
+                viewMode === "grid"
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  : "grid-cols-1"
               }`}
             >
               {paginatedProducts.map((product) => (
@@ -338,20 +418,24 @@ export default function ShopPage() {
                   Previous
                 </Button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    onClick={() => setCurrentPage(page)}
-                    className="w-10"
-                  >
-                    {page}
-                  </Button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      onClick={() => setCurrentPage(page)}
+                      className="w-10"
+                    >
+                      {page}
+                    </Button>
+                  )
+                )}
 
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
                 >
                   Next
@@ -364,5 +448,5 @@ export default function ShopPage() {
 
       <Footer />
     </div>
-  )
+  );
 }
