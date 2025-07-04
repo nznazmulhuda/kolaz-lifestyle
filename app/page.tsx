@@ -13,24 +13,26 @@ import { Product, useApp } from "@/contexts/AppContext";
 import { mockProducts, categories, benefits } from "@/lib/mock-data";
 import bannerImage from "@/assets/banner.jpg";
 import { productAPI } from "@/lib/api/productApi";
+import {
+  useBestSellerProducts,
+  useFeaturedProducts,
+} from "@/hooks/productQueries";
 
 export default function HomePage() {
   const { state, dispatch } = useApp();
+  const { data: featuredProducts } = useFeaturedProducts();
+  const { data: bestSellerProducts } = useBestSellerProducts();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const featuredProducts = await productAPI.getFeaturedProducts();
-      const bestSellerProducts = await productAPI.getBestSellerProducts();
-
-      dispatch({ type: "SET_FEATURED_PRODUCTS", payload: featuredProducts });
-      dispatch({
-        type: "SET_BESTSELLER_PRODUCTS",
-        payload: bestSellerProducts,
-      });
-    };
-
-    fetchData();
-  }, [dispatch]);
+    dispatch({
+      type: "SET_FEATURED_PRODUCTS",
+      payload: featuredProducts as Product[],
+    });
+    dispatch({
+      type: "SET_BESTSELLER_PRODUCTS",
+      payload: bestSellerProducts as Product[],
+    });
+  }, [featuredProducts, bestSellerProducts]);
 
   return (
     <div className="min-h-screen bg-white">

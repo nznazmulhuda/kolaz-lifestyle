@@ -13,7 +13,7 @@ export const useAllProducts = () =>
 export const useFeaturedProducts = () =>
   useQuery({
     queryKey: ["products", "featured"],
-    queryFn: () => productAPI.getFeaturedProducts(),
+    queryFn: async () => await productAPI.getFeaturedProducts(),
     staleTime: 1000 * 60 * 10, // 10 min
   });
 
