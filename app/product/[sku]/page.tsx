@@ -30,7 +30,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useApp } from "@/contexts/AppContext";
-import { mockProducts } from "@/lib/mock-data";
 import type { Product } from "@/contexts/AppContext";
 import { productAPI } from "@/lib/api/productApi";
 
@@ -72,14 +71,12 @@ export default function ProductPage() {
     return <div>Loading...</div>;
   }
 
+  // count total discount
   const discountPercentage = product.salePrice
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
     : 0;
 
-  // const relatedProducts = state.products
-  //   .filter((p) => p.id !== product.id && p.category === product.category)
-  //   .slice(0, 4);
-
+  // add to cart function
   const addToCart = () => {
     if (!selectedSize || !selectedColor) {
       toast({
@@ -104,6 +101,7 @@ export default function ProductPage() {
     });
   };
 
+  // copy product link
   const shareProduct = async () => {
     const productUrl = `${window.location.origin}/product/${product.id}`;
 
@@ -122,6 +120,7 @@ export default function ProductPage() {
     }
   };
 
+  // submit review
   const handleReviewSubmit = () => {
     if (reviewRating === 0) {
       toast({
@@ -474,7 +473,9 @@ export default function ProductPage() {
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="care">Care Instructions</TabsTrigger>
               <TabsTrigger value="shipping">Shipping</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews (124)</TabsTrigger>
+              <TabsTrigger value="reviews">
+                Reviews ({product.review})
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="description" className="mt-6">
@@ -550,9 +551,15 @@ export default function ProductPage() {
                         />
                       ))}
                     </div>
-                    <span className="text-lg font-semibold">4.8 out of 5</span>
-                    <span className="text-gray-600">(124 reviews)</span>
+                    <span className="text-lg font-semibold">
+                      {product.rating} out of 5
+                    </span>
+                    <span className="text-gray-600">
+                      ({product.review} reviews)
+                    </span>
                   </div>
+
+                  {/* review box */}
                   <Dialog
                     open={isReviewModalOpen}
                     onOpenChange={setIsReviewModalOpen}

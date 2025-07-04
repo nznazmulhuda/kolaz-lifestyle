@@ -88,9 +88,9 @@ class ProductAPI {
    * Get all color data
    */
   async getColors(): Promise<FlatColor[]> {
-    const res = await api.get<Color[]>(`/products?fields=color.name,color.hex`);
+    const { data } = await api.get(`/products?fields=color.name,color.hex`);
 
-    const rawColors = res?.data?.data || [];
+    const rawColors: Color[] = data?.data;
 
     const seen = new Set<string>();
 
@@ -113,7 +113,7 @@ class ProductAPI {
 
   async getCategory(): Promise<string[]> {
     const res = await api.get(`/products?fields=category.main`);
-    const data = res?.data?.data || [];
+    const data: { category: { main: string } }[] = res?.data?.data || [];
 
     const seen = new Set<string>();
 
