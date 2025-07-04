@@ -17,7 +17,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Product, useApp } from "@/contexts/AppContext";
-import { productAPI } from "@/lib/api/productApi";
 import {
   useAllProducts,
   useCategories,
@@ -43,7 +42,7 @@ export default function ShopPage() {
   const [selectedGender, setSelectedGender] = useState<string[]>([]);
 
   // get data
-  const { data } = useAllProducts();
+  const { data, isFetched } = useAllProducts();
   const { data: colors } = useColors();
   const { data: categories } = useCategories();
 
@@ -57,7 +56,9 @@ export default function ShopPage() {
     dispatch({ type: "SET_CATEGORYS", payload: categories as string[] });
 
     setFilteredProducts(data as Product[]);
-  }, [dispatch, data, colors, categories]);
+  }, [dispatch, data, colors, categories, isFetched]);
+
+  console.log(filteredProducts);
 
   // filtering
   useEffect(() => {

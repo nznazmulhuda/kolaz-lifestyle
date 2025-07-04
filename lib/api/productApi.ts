@@ -68,8 +68,10 @@ class ProductAPI {
   /**
    * Get related data
    */
-  async getRelatedProducts(sku: string) {
-    const { data } = await api.get(`/products?limit=4&category.main=${sku}`);
+  async getRelatedProducts(category: string) {
+    const { data } = await api.get(
+      `/products?limit=4&category.main=${category}`
+    );
 
     return data.data.map(transformToFrontendProduct);
   }

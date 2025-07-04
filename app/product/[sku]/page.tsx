@@ -32,6 +32,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { useApp } from "@/contexts/AppContext";
 import type { Product } from "@/contexts/AppContext";
 import { productAPI } from "@/lib/api/productApi";
+import { useProductById, useRelatedProducts } from "@/hooks/productQueries";
 
 export default function ProductPage() {
   const params = useParams();
@@ -47,25 +48,22 @@ export default function ProductPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
 
+  // get data
+  const { data: foundProduct } = useProductById(params.sku as string);
+  const { data: relatedProducts } = useRelatedProducts(
+    foundProduct?.category as string
+  );
+
+  // initial state
   useEffect(() => {
-    const fetchData = async () => {
-      const foundProduct = await productAPI.getById(params?.sku as string);
+    dispatch({ type: "SET_RELATED_PRODUCTS", payload: relatedProducts });
 
-      const relatedProducts = await productAPI.getRelatedProducts(
-        foundProduct?.category
-      );
-
-      dispatch({ type: "SET_RELATED_PRODUCTS", payload: relatedProducts });
-
-      if (foundProduct) {
-        setProduct(foundProduct);
-        setSelectedColor(foundProduct.colors[0].name);
-        setSelectedSize(foundProduct.sizes[0]);
-      }
-    };
-
-    fetchData();
-  }, [params.id]);
+    if (foundProduct) {
+      setProduct(foundProduct);
+      setSelectedColor(foundProduct.colors[0].name);
+      setSelectedSize(foundProduct.sizes[0]);
+    }
+  }, [params.id, foundProduct, relatedProducts]);
 
   if (!product) {
     return <div>Loading...</div>;
@@ -670,13 +668,13 @@ export default function ProductPage() {
         </div>
 
         {/* Related Products */}
-        {state?.relatedProducts.length > 0 && (
+        {state?.relatedProducts?.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               You May Also Like
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {state?.relatedProducts.map((relatedProduct) => (
+              {state?.relatedProducts?.map((relatedProduct) => (
                 <ProductCard key={relatedProduct.id} product={relatedProduct} />
               ))}
             </div>

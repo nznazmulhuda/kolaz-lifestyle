@@ -58,3 +58,12 @@ export const useProductsByCategory = (category: string) =>
     enabled: !!category,
     staleTime: 1000 * 60 * 10,
   });
+
+// ✅ 8. Related products
+export const useRelatedProducts = (category: string) =>
+  useQuery({
+    queryKey: ["products", "by-category", category, "related-products"],
+    queryFn: async () => await productAPI.getRelatedProducts(category),
+    enabled: !!category,
+    staleTime: 1000 * 60 * 10,
+  });
