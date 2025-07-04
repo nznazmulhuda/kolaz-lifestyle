@@ -55,6 +55,17 @@ class ProductAPI {
   }
 
   /**
+   * Get categorywise product
+   */
+  async getCategoryProduct(category: string) {
+    const { data } = await api.get(
+      `/products?limit=40&category.main=${category}`
+    );
+
+    return data?.data?.map(transformToFrontendProduct);
+  }
+
+  /**
    * Get related data
    */
   async getRelatedProducts(sku: string) {

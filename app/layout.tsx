@@ -5,6 +5,7 @@ import "./globals.css";
 import { AppProvider } from "@/contexts/AppContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/next";
+import LayoutWrapper from "@/components/layoutWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,12 +22,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AppProvider>
-          {children}
-          <Toaster />
-        </AppProvider>
+        <LayoutWrapper>
+          <AppProvider>
+            {children}
+            <Toaster />
+          </AppProvider>
 
-        <Analytics />
+          <Analytics />
+        </LayoutWrapper>
       </body>
     </html>
   );

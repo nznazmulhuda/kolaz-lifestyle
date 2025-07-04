@@ -30,9 +30,7 @@ export function Header() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
-    { href: "/women", label: "Women" },
-    { href: "/men", label: "Men" },
-    { href: "/accessories", label: "Accessories" },
+    { href: "/jeans", label: "Jeans" },
   ];
 
   // Handle search suggestions
