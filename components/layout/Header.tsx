@@ -8,9 +8,8 @@ import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useApp } from "@/contexts/AppContext";
+import { Product, useApp } from "@/contexts/AppContext";
 import { CartSidebar } from "@/components/cart/CartSidebar";
-import { mockProducts } from "@/lib/mock-data";
 import { useRouter } from "next/navigation";
 
 export function Header() {
@@ -18,7 +17,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<typeof mockProducts>([]);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -36,7 +35,7 @@ export function Header() {
   // Handle search suggestions
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
-      const filteredProducts = mockProducts
+      const filteredProducts = state.products
         .filter(
           (product) =>
             product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -14,7 +14,7 @@ export const transformToFrontendProduct = (product: TDenimProduct): Product => {
     brand: product.brand.name,
     colors: product.color.map((c) => ({ name: c.name, hex: c.hex })),
     sizes: product.sizes.map((s) => s.size),
-    stock: product.stock,
+    stock: product.sizes[0].stock,
     isNewArrival: product.isNewArrival,
     isBestSeller: product.isBestSeller,
     isFeatured: product.isFeatured,
