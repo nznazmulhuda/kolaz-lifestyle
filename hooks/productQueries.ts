@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 export const useAllProducts = () =>
   useQuery({
     queryKey: ["products", "all"],
-    queryFn: () => productAPI.getAll(),
+    queryFn: async () => await productAPI.getAll(),
     staleTime: 1000 * 60 * 5, // 5 min
   });
 
@@ -21,7 +21,7 @@ export const useFeaturedProducts = () =>
 export const useBestSellerProducts = () =>
   useQuery({
     queryKey: ["products", "best-sellers"],
-    queryFn: () => productAPI.getBestSellerProducts(),
+    queryFn: async () => productAPI.getBestSellerProducts(),
     staleTime: 1000 * 60 * 10,
   });
 
@@ -29,7 +29,7 @@ export const useBestSellerProducts = () =>
 export const useColors = () =>
   useQuery({
     queryKey: ["products", "colors"],
-    queryFn: () => productAPI.getColors(),
+    queryFn: async () => await productAPI.getColors(),
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 
@@ -37,7 +37,7 @@ export const useColors = () =>
 export const useCategories = () =>
   useQuery({
     queryKey: ["products", "categories"],
-    queryFn: () => productAPI.getCategory(),
+    queryFn: async () => await productAPI.getCategory(),
     staleTime: 1000 * 60 * 60,
   });
 
@@ -45,7 +45,7 @@ export const useCategories = () =>
 export const useProductById = (id: string) =>
   useQuery({
     queryKey: ["products", "single", id],
-    queryFn: () => productAPI.getById(id),
+    queryFn: async () => await productAPI.getById(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
   });
@@ -54,7 +54,7 @@ export const useProductById = (id: string) =>
 export const useProductsByCategory = (category: string) =>
   useQuery({
     queryKey: ["products", "by-category", category],
-    queryFn: () => productAPI.getCategoryProduct(category),
+    queryFn: async () => await productAPI.getCategoryProduct(category),
     enabled: !!category,
     staleTime: 1000 * 60 * 10,
   });

@@ -32,7 +32,7 @@ export default function HomePage() {
       type: "SET_BESTSELLER_PRODUCTS",
       payload: bestSellerProducts as Product[],
     });
-  }, [featuredProducts, bestSellerProducts]);
+  }, [dispatch, featuredProducts, bestSellerProducts]);
 
   return (
     <div className="min-h-screen bg-white">

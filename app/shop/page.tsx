@@ -17,8 +17,12 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Product, useApp } from "@/contexts/AppContext";
-import { mockProducts } from "@/lib/mock-data";
 import { productAPI } from "@/lib/api/productApi";
+import {
+  useAllProducts,
+  useCategories,
+  useColors,
+} from "@/hooks/productQueries";
 
 export default function ShopPage() {
   const { state, dispatch } = useApp();
@@ -38,22 +42,24 @@ export default function ShopPage() {
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [selectedGender, setSelectedGender] = useState<string[]>([]);
 
+  // get data
+  const { data } = useAllProducts();
+  const { data: colors } = useColors();
+  const { data: categories } = useCategories();
+
+  // dispatch
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await productAPI.getAll();
-      const colors = await productAPI.getColors();
-      const categorys = await productAPI.getCategory();
+    dispatch({ type: "SET_PRODUCTS", payload: data as Product[] });
+    dispatch({
+      type: "SET_COLORS",
+      payload: colors as { name: string; hex: string }[],
+    });
+    dispatch({ type: "SET_CATEGORYS", payload: categories as string[] });
 
-      dispatch({ type: "SET_PRODUCTS", payload: data });
-      dispatch({ type: "SET_COLORS", payload: colors });
-      dispatch({ type: "SET_CATEGORYS", payload: categorys });
+    setFilteredProducts(data as Product[]);
+  }, [dispatch, data, colors, categories]);
 
-      setFilteredProducts(data);
-    };
-
-    fetchData();
-  }, [dispatch]);
-
+  // filtering
   useEffect(() => {
     let filtered = [...state.products];
 
@@ -66,7 +72,7 @@ export default function ShopPage() {
 
     if (selectedColors.length > 0) {
       filtered = filtered.filter((p) =>
-        p.colors.some((color) => selectedColors.includes(color))
+        p.colors.some((color) => selectedColors.includes(color.name))
       );
     }
 
@@ -115,9 +121,9 @@ export default function ShopPage() {
 
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProducts?.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(
+  const paginatedProducts = filteredProducts?.slice(
     startIndex,
     startIndex + itemsPerPage
   );
@@ -294,8 +300,11 @@ export default function ShopPage() {
 
                 <p className="text-sm text-gray-600">
                   Showing {startIndex + 1}-
-                  {Math.min(startIndex + itemsPerPage, filteredProducts.length)}{" "}
-                  of {filteredProducts.length} products
+                  {Math.min(
+                    startIndex + itemsPerPage,
+                    filteredProducts?.length
+                  )}{" "}
+                  of {filteredProducts?.length} products
                 </p>
               </div>
 
@@ -410,7 +419,7 @@ export default function ShopPage() {
                   : "grid-cols-1"
               }`}
             >
-              {paginatedProducts.map((product) => (
+              {paginatedProducts?.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
