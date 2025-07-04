@@ -1,6 +1,6 @@
 import type { Product, Order } from "@/contexts/AppContext";
 
-export const mockProducts: Product[] = [
+export const mockProducts = [
   {
     id: "1",
     name: "Ultra High-Rise Denim Jeans",
@@ -358,14 +358,7 @@ export const mockOrders: Order[] = [
 ];
 
 export const categories = [
-  { id: "1", name: "Women", image: "/placeholder.svg?height=300&width=300" },
-  { id: "2", name: "Men", image: "/placeholder.svg?height=300&width=300" },
-  { id: "3", name: "Unisex", image: "/placeholder.svg?height=300&width=300" },
-  {
-    id: "4",
-    name: "Accessories",
-    image: "/placeholder.svg?height=300&width=300",
-  },
+  { id: "1", name: "Jeans", image: "/placeholder.svg?height=300&width=300" },
 ];
 
 export const benefits = [

@@ -42,7 +42,7 @@ export default function ShopPage() {
   const [selectedGender, setSelectedGender] = useState<string[]>([]);
 
   // get data
-  const { data, isFetched } = useAllProducts();
+  const { data, isLoading } = useAllProducts();
   const { data: colors } = useColors();
   const { data: categories } = useCategories();
 
@@ -55,10 +55,8 @@ export default function ShopPage() {
     });
     dispatch({ type: "SET_CATEGORYS", payload: categories as string[] });
 
-    setFilteredProducts(data as Product[]);
-  }, [dispatch, data, colors, categories, isFetched]);
-
-  console.log(filteredProducts);
+    !isLoading && setFilteredProducts(data as Product[]);
+  }, [dispatch, data, colors, categories, isLoading]);
 
   // filtering
   useEffect(() => {
