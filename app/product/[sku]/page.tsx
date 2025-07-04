@@ -1,63 +1,92 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
-import Image from "next/image"
-import { Heart, Share2, Minus, Plus, ShoppingBag, Star, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { Header } from "@/components/layout/Header"
-import { Footer } from "@/components/layout/Footer"
-import { ProductCard } from "@/components/product/ProductCard"
-import { useApp } from "@/contexts/AppContext"
-import { mockProducts } from "@/lib/mock-data"
-import type { Product } from "@/contexts/AppContext"
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Image from "next/image";
+import {
+  Heart,
+  Share2,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { ProductCard } from "@/components/product/ProductCard";
+import { useApp } from "@/contexts/AppContext";
+import { mockProducts } from "@/lib/mock-data";
+import type { Product } from "@/contexts/AppContext";
+import { productAPI } from "@/lib/api/productApi";
 
 export default function ProductPage() {
-  const params = useParams()
-  const { dispatch } = useApp()
-  const { toast } = useToast()
-  const [product, setProduct] = useState<Product | null>(null)
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedSize, setSelectedSize] = useState("")
-  const [selectedColor, setSelectedColor] = useState("")
-  const [quantity, setQuantity] = useState(1)
-  const [isLiked, setIsLiked] = useState(false)
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
-  const [reviewRating, setReviewRating] = useState(0)
-  const [reviewText, setReviewText] = useState("")
+  const params = useParams();
+  const { state, dispatch } = useApp();
+  const { toast } = useToast();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
 
   useEffect(() => {
-    const foundProduct = mockProducts.find((p) => p.id === params.id)
-    if (foundProduct) {
-      setProduct(foundProduct)
-      setSelectedColor(foundProduct.colors[0])
-      setSelectedSize(foundProduct.sizes[0])
-    }
-  }, [params.id])
+    const fetchData = async () => {
+      const foundProduct = await productAPI.getById(params?.sku as string);
+
+      const relatedProducts = await productAPI.getRelatedProducts(
+        foundProduct?.category
+      );
+
+      dispatch({ type: "SET_RELATED_PRODUCTS", payload: relatedProducts });
+
+      if (foundProduct) {
+        setProduct(foundProduct);
+        setSelectedColor(foundProduct.colors[0].name);
+        setSelectedSize(foundProduct.sizes[0]);
+      }
+    };
+
+    fetchData();
+  }, [params.id]);
 
   if (!product) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   const discountPercentage = product.salePrice
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-    : 0
+    : 0;
 
-  const relatedProducts = mockProducts.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4)
+  // const relatedProducts = state.products
+  //   .filter((p) => p.id !== product.id && p.category === product.category)
+  //   .slice(0, 4);
 
   const addToCart = () => {
     if (!selectedSize || !selectedColor) {
       toast({
         title: "Please select size and color",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     const cartItem = {
@@ -66,40 +95,40 @@ export default function ProductPage() {
       size: selectedSize,
       color: selectedColor,
       quantity,
-    }
+    };
 
-    dispatch({ type: "ADD_TO_CART", payload: cartItem })
+    dispatch({ type: "ADD_TO_CART", payload: cartItem });
     toast({
       title: "Added to cart!",
       description: `${product.name} has been added to your cart.`,
-    })
-  }
+    });
+  };
 
   const shareProduct = async () => {
-    const productUrl = `${window.location.origin}/product/${product.id}`
+    const productUrl = `${window.location.origin}/product/${product.id}`;
 
     try {
-      await navigator.clipboard.writeText(productUrl)
+      await navigator.clipboard.writeText(productUrl);
       toast({
         title: "Product link copied to clipboard!",
         description: "Share this product with your friends",
-      })
+      });
     } catch (err) {
       toast({
         title: "Failed to copy link",
         description: "Please try again",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleReviewSubmit = () => {
     if (reviewRating === 0) {
       toast({
         title: "Please select a rating",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (reviewText.trim().length < 10) {
@@ -107,21 +136,21 @@ export default function ProductPage() {
         title: "Please write a detailed review",
         description: "Review must be at least 10 characters long",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Simulate review submission
     toast({
       title: "Thank you for your feedback!",
       description: "Your review has been submitted and will be published soon.",
-    })
+    });
 
     // Reset form and close modal
-    setReviewRating(0)
-    setReviewText("")
-    setIsReviewModalOpen(false)
-  }
+    setReviewRating(0);
+    setReviewText("");
+    setIsReviewModalOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -148,7 +177,11 @@ export default function ProductPage() {
                     size="icon"
                     className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
                     onClick={() =>
-                      setSelectedImage(selectedImage === 0 ? product.images.length - 1 : selectedImage - 1)
+                      setSelectedImage(
+                        selectedImage === 0
+                          ? product.images.length - 1
+                          : selectedImage - 1
+                      )
                     }
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -158,7 +191,11 @@ export default function ProductPage() {
                     size="icon"
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
                     onClick={() =>
-                      setSelectedImage(selectedImage === product.images.length - 1 ? 0 : selectedImage + 1)
+                      setSelectedImage(
+                        selectedImage === product.images.length - 1
+                          ? 0
+                          : selectedImage + 1
+                      )
                     }
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -168,9 +205,13 @@ export default function ProductPage() {
 
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
-                {product.isNewArrival && <Badge className="bg-rose-600 text-white">New Arrival</Badge>}
+                {product.isNewArrival && (
+                  <Badge className="bg-rose-600 text-white">New Arrival</Badge>
+                )}
                 {discountPercentage > 0 && (
-                  <Badge className="bg-green-600 text-white">-{discountPercentage}% OFF</Badge>
+                  <Badge className="bg-green-600 text-white">
+                    -{discountPercentage}% OFF
+                  </Badge>
                 )}
               </div>
             </div>
@@ -182,7 +223,9 @@ export default function ProductPage() {
                   <button
                     key={index}
                     className={`relative w-20 h-20 rounded-md overflow-hidden border-2 flex-shrink-0 ${
-                      selectedImage === index ? "border-rose-600" : "border-gray-200"
+                      selectedImage === index
+                        ? "border-rose-600"
+                        : "border-gray-200"
                     }`}
                     onClick={() => setSelectedImage(index)}
                   >
@@ -201,21 +244,30 @@ export default function ProductPage() {
           {/* Product Details */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {product.name}
+              </h1>
               <p className="text-gray-600 mb-4">{product.brand}</p>
 
               {/* Price */}
               <div className="flex items-center space-x-4 mb-4">
                 {product.salePrice ? (
                   <>
-                    <span className="text-3xl font-bold text-gray-900">৳{product.salePrice.toLocaleString()}</span>
-                    <span className="text-xl text-gray-500 line-through">৳{product.price.toLocaleString()}</span>
+                    <span className="text-3xl font-bold text-gray-900">
+                      ৳{product.salePrice.toLocaleString()}
+                    </span>
+                    <span className="text-xl text-gray-500 line-through">
+                      ৳{product.price.toLocaleString()}
+                    </span>
                     <Badge className="bg-green-600 text-white">
-                      Save ৳{(product.price - product.salePrice).toLocaleString()}
+                      Save ৳
+                      {(product.price - product.salePrice).toLocaleString()}
                     </Badge>
                   </>
                 ) : (
-                  <span className="text-3xl font-bold text-gray-900">৳{product.price.toLocaleString()}</span>
+                  <span className="text-3xl font-bold text-gray-900">
+                    ৳{product.price.toLocaleString()}
+                  </span>
                 )}
               </div>
 
@@ -223,10 +275,15 @@ export default function ProductPage() {
               <div className="flex items-center space-x-2 mb-6">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
-                <span className="text-sm text-gray-600">(4.8) • 124 reviews</span>
+                <span className="text-sm text-gray-600">
+                  ({product.rating}) • {product.review} reviews
+                </span>
               </div>
             </div>
 
@@ -234,15 +291,17 @@ export default function ProductPage() {
             <div>
               <h3 className="font-medium mb-3">Color: {selectedColor}</h3>
               <div className="flex space-x-3">
-                {product.colors.map((color) => (
+                {product.colors.map((color, id) => (
                   <button
-                    key={color}
+                    key={id}
                     className={`w-10 h-10 rounded-full border-2 ${
-                      selectedColor === color ? "border-gray-900 ring-2 ring-gray-300" : "border-gray-300"
+                      selectedColor === color.name
+                        ? "border-gray-900 ring-2 ring-gray-300"
+                        : "border-gray-300"
                     }`}
-                    style={{ backgroundColor: color.toLowerCase() }}
-                    onClick={() => setSelectedColor(color)}
-                    title={color}
+                    style={{ backgroundColor: color.hex }}
+                    onClick={() => setSelectedColor(color.name)}
+                    title={color.name}
                   />
                 ))}
               </div>
@@ -254,7 +313,10 @@ export default function ProductPage() {
                 <h3 className="font-medium">Size: {selectedSize}</h3>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="link" className="text-sm text-rose-600 p-0">
+                    <Button
+                      variant="link"
+                      className="text-sm text-rose-600 p-0"
+                    >
                       Size Guide
                     </Button>
                   </DialogTrigger>
@@ -263,7 +325,9 @@ export default function ProductPage() {
                       <DialogTitle>Size Guide</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
-                      <p className="text-sm text-gray-600">Please refer to our size chart below:</p>
+                      <p className="text-sm text-gray-600">
+                        Please refer to our size chart below:
+                      </p>
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
@@ -341,13 +405,17 @@ export default function ProductPage() {
                     variant="ghost"
                     size="icon"
                     className="h-10 w-10"
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    onClick={() =>
+                      setQuantity(Math.min(product.stock, quantity + 1))
+                    }
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
                 <span className="text-sm text-gray-600">
-                  {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                  {product.stock > 0
+                    ? `${product.stock} in stock`
+                    : "Out of stock"}
                 </span>
               </div>
             </div>
@@ -364,11 +432,23 @@ export default function ProductPage() {
               </Button>
 
               <div className="flex space-x-4">
-                <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setIsLiked(!isLiked)}>
-                  <Heart className={`h-4 w-4 mr-2 ${isLiked ? "fill-rose-600 text-rose-600" : ""}`} />
+                <Button
+                  variant="outline"
+                  className="flex-1 bg-transparent"
+                  onClick={() => setIsLiked(!isLiked)}
+                >
+                  <Heart
+                    className={`h-4 w-4 mr-2 ${
+                      isLiked ? "fill-rose-600 text-rose-600" : ""
+                    }`}
+                  />
                   {isLiked ? "Saved" : "Save"}
                 </Button>
-                <Button variant="outline" className="flex-1 bg-transparent" onClick={shareProduct}>
+                <Button
+                  variant="outline"
+                  className="flex-1 bg-transparent"
+                  onClick={shareProduct}
+                >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
@@ -399,7 +479,9 @@ export default function ProductPage() {
 
             <TabsContent value="description" className="mt-6">
               <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed mb-4">{product.description}</p>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  {product.description}
+                </p>
                 <h4 className="font-semibold mb-2">Features:</h4>
                 <ul className="list-disc list-inside space-y-1 text-gray-700">
                   <li>Premium quality materials</li>
@@ -408,7 +490,10 @@ export default function ProductPage() {
                   <li>Easy to care for</li>
                 </ul>
                 <h4 className="font-semibold mt-4 mb-2">Materials:</h4>
-                <p className="text-gray-700">Made from sustainable and high-quality materials sourced responsibly.</p>
+                <p className="text-gray-700">
+                  Made from sustainable and high-quality materials sourced
+                  responsibly.
+                </p>
               </div>
             </TabsContent>
 
@@ -423,7 +508,8 @@ export default function ProductPage() {
                   <li>Do not dry clean</li>
                 </ul>
                 <p className="text-sm text-gray-600 mt-4">
-                  Following these care instructions will help maintain the quality and longevity of your garment.
+                  Following these care instructions will help maintain the
+                  quality and longevity of your garment.
                 </p>
               </div>
             </TabsContent>
@@ -435,7 +521,9 @@ export default function ProductPage() {
                   <div>
                     <h5 className="font-medium mb-2">Standard Delivery</h5>
                     <p className="text-gray-700 text-sm">3-5 business days</p>
-                    <p className="text-gray-700 text-sm">৳60 (Free on orders over ৳2000)</p>
+                    <p className="text-gray-700 text-sm">
+                      ৳60 (Free on orders over ৳2000)
+                    </p>
                   </div>
                   <div>
                     <h5 className="font-medium mb-2">Express Delivery</h5>
@@ -444,7 +532,8 @@ export default function ProductPage() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-600">
-                  Orders placed before 2 PM are processed the same day. Weekend orders are processed on Monday.
+                  Orders placed before 2 PM are processed the same day. Weekend
+                  orders are processed on Monday.
                 </p>
               </div>
             </TabsContent>
@@ -455,13 +544,19 @@ export default function ProductPage() {
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                        <Star
+                          key={i}
+                          className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                        />
                       ))}
                     </div>
                     <span className="text-lg font-semibold">4.8 out of 5</span>
                     <span className="text-gray-600">(124 reviews)</span>
                   </div>
-                  <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
+                  <Dialog
+                    open={isReviewModalOpen}
+                    onOpenChange={setIsReviewModalOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="outline">Write a Review</Button>
                     </DialogTrigger>
@@ -471,7 +566,9 @@ export default function ProductPage() {
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-sm font-medium">Rating *</Label>
+                          <Label className="text-sm font-medium">
+                            Rating *
+                          </Label>
                           <div className="flex items-center space-x-1 mt-2">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <button
@@ -493,7 +590,10 @@ export default function ProductPage() {
                         </div>
 
                         <div>
-                          <Label htmlFor="review-text" className="text-sm font-medium">
+                          <Label
+                            htmlFor="review-text"
+                            className="text-sm font-medium"
+                          >
                             Your Review *
                           </Label>
                           <Textarea
@@ -504,14 +604,22 @@ export default function ProductPage() {
                             rows={4}
                             className="mt-2"
                           />
-                          <p className="text-xs text-gray-500 mt-1">Minimum 10 characters</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Minimum 10 characters
+                          </p>
                         </div>
 
                         <div className="flex justify-end space-x-3 pt-4">
-                          <Button variant="outline" onClick={() => setIsReviewModalOpen(false)}>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsReviewModalOpen(false)}
+                          >
                             Cancel
                           </Button>
-                          <Button onClick={handleReviewSubmit} className="bg-rose-600 hover:bg-rose-700">
+                          <Button
+                            onClick={handleReviewSubmit}
+                            className="bg-rose-600 hover:bg-rose-700"
+                          >
                             Submit Review
                           </Button>
                         </div>
@@ -527,17 +635,25 @@ export default function ProductPage() {
                       <div className="flex items-center space-x-4 mb-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <Star
+                              key={i}
+                              className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                            />
                           ))}
                         </div>
                         <span className="font-medium">Sarah M.</span>
-                        <span className="text-sm text-gray-600">Verified Purchase</span>
+                        <span className="text-sm text-gray-600">
+                          Verified Purchase
+                        </span>
                       </div>
                       <p className="text-gray-700 mb-2">
-                        "Amazing quality and perfect fit! The material feels premium and the color is exactly as shown.
-                        Highly recommend!"
+                        "Amazing quality and perfect fit! The material feels
+                        premium and the color is exactly as shown. Highly
+                        recommend!"
                       </p>
-                      <p className="text-sm text-gray-600">Posted 2 weeks ago</p>
+                      <p className="text-sm text-gray-600">
+                        Posted 2 weeks ago
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -547,11 +663,13 @@ export default function ProductPage() {
         </div>
 
         {/* Related Products */}
-        {relatedProducts.length > 0 && (
+        {state?.relatedProducts.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+              You May Also Like
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
+              {state?.relatedProducts.map((relatedProduct) => (
                 <ProductCard key={relatedProduct.id} product={relatedProduct} />
               ))}
             </div>
@@ -561,5 +679,5 @@ export default function ProductPage() {
 
       <Footer />
     </div>
-  )
+  );
 }

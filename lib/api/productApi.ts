@@ -17,16 +17,6 @@ interface Color {
   }[];
 }
 
-interface Category {
-  category: {
-    main: string;
-  };
-}
-
-interface FlatCategory {
-  category: string;
-}
-
 class ProductAPI {
   /**
    * Fetch all products and transform to frontend schema
@@ -62,6 +52,15 @@ class ProductAPI {
   async getById(id: string): Promise<Product> {
     const res = await api.get<{ data: TDenimProduct }>(`/products/${id}`);
     return transformToFrontendProduct(res?.data?.data);
+  }
+
+  /**
+   * Get related data
+   */
+  async getRelatedProducts(sku: string) {
+    const { data } = await api.get(`/products?limit=4&category.main=${sku}`);
+
+    return data.data.map(transformToFrontendProduct);
   }
 
   /**

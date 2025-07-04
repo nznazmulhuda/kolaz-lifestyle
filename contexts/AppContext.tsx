@@ -15,7 +15,7 @@ interface Product {
   category: string;
   subcategory: string;
   brand: string;
-  colors: string[];
+  colors: { name: string; hex: string }[];
   sizes: string[];
   stock: number;
   isNewArrival: boolean;
@@ -23,6 +23,8 @@ interface Product {
   isFeatured: boolean;
   description: string;
   tags: string[];
+  rating: number;
+  review: number;
 }
 
 interface CartItem {
@@ -70,6 +72,7 @@ interface AppState {
   isCartOpen: boolean;
   products: Product[];
   featuredProducts: Product[];
+  relatedProducts: Product[];
   bestSellerProducts: Product[];
   orders: Order[];
   colors: FlatColor[];
@@ -87,6 +90,7 @@ type AppAction =
   | { type: "UPDATE_CART_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "CLEAR_CART" }
   | { type: "TOGGLE_CART" }
+  | { type: "SET_RELATED_PRODUCTS"; payload: Product[] }
   | { type: "SET_COLORS"; payload: FlatColor[] }
   | { type: "SET_CATEGORYS"; payload: string[] }
   | { type: "SET_PRODUCTS"; payload: Product[] }
@@ -103,6 +107,7 @@ const initialState: AppState = {
   cart: [],
   isCartOpen: false,
   products: [],
+  relatedProducts: [],
   featuredProducts: [],
   bestSellerProducts: [],
   colors: [],
@@ -158,6 +163,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case "TOGGLE_CART":
       return { ...state, isCartOpen: !state.isCartOpen };
+
+    case "SET_RELATED_PRODUCTS":
+      return { ...state, relatedProducts: action.payload };
 
     case "SET_CATEGORYS":
       return { ...state, categorys: action.payload };

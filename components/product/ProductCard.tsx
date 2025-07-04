@@ -66,10 +66,10 @@ export function ProductCard({
 
     // Add to cart with default selections (first available color and size)
     const cartItem = {
-      id: `${product.id}-${product.sizes[0]}-${product.colors[0]}`,
+      id: `${product.id}-${product.sizes[0]}-${product.colors[0].name}`,
       product,
       size: product.sizes[0],
-      color: product.colors[0],
+      color: product.colors[0].name,
       quantity: 1,
     };
 
@@ -217,8 +217,8 @@ export function ProductCard({
               <div
                 key={index}
                 className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: color.toLowerCase() }}
-                title={color}
+                style={{ backgroundColor: color.hex }}
+                title={color.name}
               />
             ))}
             {product.colors.length > 3 && (
